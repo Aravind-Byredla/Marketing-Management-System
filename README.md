@@ -1,1 +1,1 @@
-# Markleting-Management-System
+# Marketing-Management-System
