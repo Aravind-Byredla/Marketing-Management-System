@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  MANAGER
+  ADMIN
+  TEAM_MEMBER
+  SUPER_ADMIN
+}
+
+enum RequestStatus {
+  DRAFT
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  UNDER_REVIEW
+  COMPLETED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(MANAGER)
+  department    String?
+  location      String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  requestsCreated   Request[]    @relation("RequestCreatedBy")
+  requestsAssigned  Request[]    @relation("RequestAssignedTo")
+  notifications     Notification[]
+  sessions          Session[]
+  accounts          Account[]
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  branches  Branch[]
+  requests  Request[]
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String
+  companyId String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  company   Company  @relation(fields: [companyId], references: [id])
+  requests  Request[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  icon        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  subcategories Subcategory[]
+  requests      Request[]
+}
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  name       String
+  categoryId String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  category   Category  @relation(fields: [categoryId], references: [id])
+  requests   Request[]
+}
+
+model Request {
+  id            String        @id @default(cuid())
+  requestId     String        @unique
+  title         String
+  objective     String
+  summary       String?
+  quantity      String?
+  notes         String?
+  status        RequestStatus @default(DRAFT)
+  priority      Priority      @default(MEDIUM)
+  deadline      DateTime?
+  companyId     String
+  branchId      String?
+  categoryId    String
+  subcategoryId String?
+  createdById   String
+  assignedToId  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  company       Company       @relation(fields: [companyId], references: [id])
+  branch        Branch?       @relation(fields: [branchId], references: [id])
+  category      Category      @relation(fields: [categoryId], references: [id])
+  subcategory   Subcategory?  @relation(fields: [subcategoryId], references: [id])
+  createdBy     User          @relation("RequestCreatedBy", fields: [createdById], references: [id])
+  assignedTo    User?         @relation("RequestAssignedTo", fields: [assignedToId], references: [id])
+  attachments   Attachment[]
+  notifications Notification[]
+}
+
+model Attachment {
+  id          String   @id @default(cuid())
+  requestId   String
+  fileName    String
+  fileUrl     String
+  fileType    String
+  fileSize    Int?
+  uploadedAt  DateTime @default(now())
+  request     Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  requestId String?
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  request   Request? @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
