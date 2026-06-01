@@ -1,0 +1,61 @@
+# ============================================================
+# Marketing & Branding System — Backend Dependencies
+# ============================================================
+
+# Core
+Django==5.0.6
+djangorestframework==3.15.2
+django-environ==0.11.2
+
+# Database
+psycopg2-binary==2.9.9
+
+# Auth
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.4.0
+
+# Filtering & Search
+django-filter==24.2
+
+# API Docs
+drf-spectacular==0.27.2
+
+# Async / WebSocket
+channels==4.1.0
+channels-redis==4.2.0
+daphne==4.1.2
+
+# Celery
+celery==5.4.0
+django-celery-beat==2.6.0
+django-celery-results==2.5.1
+redis==5.0.7
+kombu==5.3.4
+
+# File handling
+Pillow==10.4.0
+django-storages==1.14.4
+
+# Utilities
+python-slugify==8.0.4
+python-dateutil==2.9.0
+pytz==2024.1
+
+# Email
+django-anymail==10.3
+
+# Testing
+pytest==8.2.2
+pytest-django==4.8.0
+pytest-cov==5.0.0
+factory-boy==3.3.0
+faker==25.9.1
+
+# Dev tools
+black==24.4.2
+isort==5.13.2
+flake8==7.1.0
+
+# Production WSGI/ASGI
+gunicorn==22.0.0
+uvicorn[standard]==0.30.1
