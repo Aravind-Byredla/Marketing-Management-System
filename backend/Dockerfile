@@ -36,10 +36,11 @@ EXPOSE 8000
 # Run migrations + collect static, then start the ASGI server.
 # Shell form is required so $PORT (set by Render) expands at runtime.
 CMD python manage.py migrate --noinput && \
-    python manage.py collectstatic --noinput && \
-    gunicorn core.asgi:application \
-        -k uvicorn.workers.UvicornWorker \
-        --workers ${WEB_CONCURRENCY:-2} \
-        --bind 0.0.0.0:${PORT:-8000} \
-        --timeout 120 \
-        --access-logfile -
+       python manage.py collectstatic --noinput && \
+       (python manage.py createsuperuser --noinput || true) && \
+       gunicorn core.asgi:application \
+           -k uvicorn.workers.UvicornWorker \
+           --workers ${WEB_CONCURRENCY:-2} \
+           --bind 0.0.0.0:${PORT:-8000} \
+           --timeout 120 \
+           --access-logfile -
